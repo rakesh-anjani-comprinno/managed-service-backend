@@ -2,6 +2,7 @@ const express = require('express');
 var cors = require('cors')
 const app = express();
 const jiraWorklogRoutes = require('./routes/jira-worklog.routes');
+const alertRoutes = require('.//routes/alert.routes');
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -11,5 +12,6 @@ app.use(cors({
 
 // Routes
 app.use('/api/worklog', jiraWorklogRoutes);
+app.use('/api/alert-dashboard',alertRoutes)
 
 module.exports = app;
