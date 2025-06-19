@@ -34,6 +34,30 @@ class jiraWorklogControll {
         const response = await jiraApi.get('/rest/api/3/search',params)
         return res.json(response.data)
     }
+
+    static getAllWorkIssuesForExcelSheet = async (req,res) => {
+        let params = req.query
+        let issues = [];
+        try {
+            while(true){
+                const response = await jiraApi.get('/rest/api/3/search',{
+                        ...params
+                    }
+                )
+                issues = [...issues, ...response.data?.issues]
+                if(response.data?.maxResults > response.data?.issues?.length){
+                    break;
+                }
+                params = { ...params, startAt: response.data?.startAt + response.data?.maxResults}
+            }
+            return res.json(issues);
+        }catch(error){
+            console.log('error',error)
+            const { message,code,status,config : { url , params , method }} = error
+            // res.json({message,code,status,url,params,method,provider:'jira'})
+            res.json(error)
+        }
+    }
 }
 
 module.exports = {
