@@ -24,14 +24,25 @@ class jiraWorklogControll {
             return res.json(allUsers);
 
         }catch(error){
-            console.error({error});
-            throw error;
+            const { message,code,status,config : { url , params , method }} = error
+            res.status(status || 500).json(error)
         }
     }
 
     static getWorklogIssues = async (req,res) => {
-        const params = req.query
-        const response = await jiraApi.get('/rest/api/3/search',params)
+        try{
+            const params = req.query
+            const response = await jiraApi.get('/rest/api/3/search/jql',params)
+            return res.json(response.data)
+        }catch(error){
+            const { message,code,status,config : { url , params , method }} = error
+            res.status(status || 500).json(error)
+        }
+    }
+
+    static getCount = async (req,res) => {
+        const body = req.body
+        const response = await jiraApi.post('/rest/api/3/search/approximate-count',body)
         return res.json(response.data)
     }
 
@@ -40,22 +51,23 @@ class jiraWorklogControll {
         let issues = [];
         try {
             while(true){
-                const response = await jiraApi.get('/rest/api/3/search',{
+                const response = await jiraApi.get('/rest/api/3/search/jql',{
                         ...params
                     }
                 )
                 issues = [...issues, ...response.data?.issues]
-                if(response.data?.maxResults > response.data?.issues?.length){
+                let nextPageToken;
+                if(response.data?.isLast){
                     break;
+                }else{
+                    nextPageToken = response.data?.nextPageToken
                 }
-                params = { ...params, startAt: response.data?.startAt + response.data?.maxResults}
+                params = { ...params , nextPageToken : nextPageToken ?? nextPageToken }
             }
             return res.json(issues);
-        }catch(error){
-            console.log('error',error)
+        }catch(error){ 
             const { message,code,status,config : { url , params , method }} = error
-            // res.json({message,code,status,url,params,method,provider:'jira'})
-            res.json(error)
+            res.status(status || 500).json(error)
         }
     }
 }
