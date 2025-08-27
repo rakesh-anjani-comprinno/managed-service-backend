@@ -17,7 +17,7 @@ class PagerDutyController {
             res.json(services)
         }catch(error){
             const { message,code,status,config : { url , params , method }} = error
-            res.json({message,code,status,url,params,method,provider:'pagerduty'})
+            res.status(status || 500).json({message,code,status,url,params,method,provider:'pagerduty'})
         }
         
     }
@@ -37,7 +37,7 @@ class PagerDutyController {
             res.json(incidents);
         }catch(error){
             const { message,code,status,config : { url , params , method }} = error
-            res.json({message,code,status,url,params,method,provider:'pagerduty'})
+            res.status(status || 500).json({message,code,status,url,params,method,provider:'pagerduty'})
         }
     }
 }
